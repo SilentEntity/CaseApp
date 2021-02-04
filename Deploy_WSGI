@@ -1,5 +1,5 @@
 node('PyNode'){
-    dir('/home/$USER'){
+    dir('/home/$REMOTE_USER'){
         stage('Git Checkout'){
             git branch: 'main', url: 'https://github.com/SilentEntity/CaseApp.git'
         }
