@@ -29,7 +29,19 @@ node('PyNode'){
         stage('Disable FireWall'){
             sh '''#!/bin/bash
             echo "$SERVER_PASSWORD" | sudo -S ufw allow 9090
+            sleep 10
             '''
+        }
+        stage('Test the Server is UP or Not'){
+            def get = new URL("http://192.168.1.7:9090/").openConnection();
+            def getRC = get.getResponseCode();
+            if(getRC.equals(200)) {
+                //println(get.getInputStream().getText());
+                println "SERVER IS UP AND RUNNIG"
+            }
+            else{
+                error("========Server didn't come UP========")
+            }
         }
     }
 }
