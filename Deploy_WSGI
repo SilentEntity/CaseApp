@@ -20,7 +20,7 @@ node('PyNode'){
         }
         stage('SetUp WSGI Server'){
             sh '''#!/bin/bash
-            echo "$SERVER_PASSWORD" | sudo -S cp CaseApp/CaseAppWSGI.service /etc/systemd/system/
+            echo "$SERVER_PASSWORD" | sudo -S cp CaseAppWSGI.service /etc/systemd/system/
             echo "$SERVER_PASSWORD" | sudo -S systemctl start CaseAppWSGI.service
             echo "$SERVER_PASSWORD" | sudo -S systemctl enable CaseAppWSGI.service
             '''
