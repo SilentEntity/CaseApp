@@ -53,6 +53,12 @@ node('PyNode'){
                     error("========Server didn't come UP========")
                 }
             }
+            stage("Build the Docker image"){
+                sh 'docker build -t caseapp .'
+            }
+            stage("Run the Docker image"){
+                sh 'docker run -d -p 38080:9090 caseapp'
+            }
             sendmail("Completed")
         }
     }catch(err){
