@@ -43,3 +43,39 @@ $caseapp Run
 or
 For running in background
 $nohup caseapp Run >> app_out_logs.txt &
+
+For WSGI Gunicorn Server
+cat /etc/systemd/system/CaseApp.service
+=============================================================================================================
+[Unit]
+Description=Gunicorn instance to serve CaseApp
+After=network.target
+
+[Service]
+User=vagrant
+Group=www-data
+WorkingDirectory=/home/$USER/<path_to_Code>/CaseApp
+Environment="PATH=/home/$USER/<path to environment>/bin"
+ExecStart=/home/$USER/<path to environment>/bin/gunicorn --workers 3 --bind unix:CaseApp.sock -m 007 run:app
+
+[Install]
+WantedBy=multi-user.target
+=============================================================================================================
+sudo systemctl start CaseApp.service
+sudo systemctl enable CaseApp.service
+
+=======For Nginx=====
+cat /etc/nginx/sites-available/CaseApp
+server {
+    listen 80;
+    server_name 172.31.0.200;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location / {
+        include proxy_params;
+        proxy_pass http://unix:<path_to_socket>/CaseApp.sock;
+    }
+}
+Enable the site Nginx
+sudo ln -s /etc/nginx/sites-available/CaseApp /etc/nginx/sites-enabled
+ufw allow 'Nginx Full'
