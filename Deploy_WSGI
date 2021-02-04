@@ -1,47 +1,63 @@
+def sendmail(status){
+    emailext( 
+          to: "Junk@junky.com",
+          subject: "${status}: JOB '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+          body: """<p>${status}: JOB '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+                   <p> Check the Console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME}[${env.BUILD_NUMBER}]</a></p>""",
+        )
+}
 node('PyNode'){
-    def directory = '/home/'+env.REMOTE_USER+'/Deployment'
-    dir(directory){
-        stage('Git Checkout'){
-            git branch: 'main', url: 'https://github.com/SilentEntity/CaseApp.git'
-        }
-        stage('Setting up Environment'){
-            sh '''#!/bin/bash
-            echo $PATH
-            pip3 install virtualenv;
-            virtualenv -p python3 cicd_env;
-            source cicd_env/bin/activate;
-            pip3 install -r requirements.txt;
-            pip3 list'''
-        }
-        stage('BATS'){
-            sh '''#!/bin/bash
-            source cicd_env/bin/activate;
-            pytest -v'''
-        }
-        stage('SetUp WSGI Server'){
-            sh '''#!/bin/bash
-            echo "$SERVER_PASSWORD" | sudo -S cp CaseAppWSGI.service /etc/systemd/system/;
-            echo "$SERVER_PASSWORD" | sudo -S systemctl daemon-reload;
-            echo "$SERVER_PASSWORD" | sudo -S systemctl start CaseAppWSGI.service;
-            echo "$SERVER_PASSWORD" | sudo -S systemctl enable CaseAppWSGI.service
-            '''
-        }
-        stage('Disable FireWall'){
-            sh '''#!/bin/bash
-            echo "$SERVER_PASSWORD" | sudo -S ufw allow 9090
-            sleep 10
-            '''
-        }
-        stage('Test the Server is UP or Not'){
-            def get = new URL("http://192.168.1.7:9090/").openConnection();
-            def getRC = get.getResponseCode();
-            if(getRC.equals(200)) {
-                //println(get.getInputStream().getText());
-                println "SERVER IS UP AND RUNNIG"
+    try{
+        def directory = '/home/'+env.REMOTE_USER+'/Deployment'
+        dir(directory){
+            stage('Git Checkout'){
+                git branch: 'main', url: 'https://github.com/SilentEntity/CaseApp.git'
             }
-            else{
-                error("========Server didn't come UP========")
+            sendmail("Started")
+            stage('Setting up Environment'){
+                sh '''#!/bin/bash
+                echo $PATH
+                pip3 install virtualenv;
+                virtualenv -p python3 cicd_env;
+                source cicd_env/bin/activate;
+                pip3 install -r requirements.txt;
+                pip3 list'''
             }
+            stage('BATS'){
+                sh '''#!/bin/bash
+                source cicd_env/bin/activate;
+                pytest -v'''
+            }
+            stage('SetUp WSGI Server'){
+                sh '''#!/bin/bash
+                echo "$SERVER_PASSWORD" | sudo -S cp CaseAppWSGI.service /etc/systemd/system/;
+                echo "$SERVER_PASSWORD" | sudo -S systemctl daemon-reload;
+                echo "$SERVER_PASSWORD" | sudo -S systemctl start CaseAppWSGI.service;
+                echo "$SERVER_PASSWORD" | sudo -S systemctl enable CaseAppWSGI.service
+                '''
+            }
+            stage('Disable FireWall'){
+                sh '''#!/bin/bash
+                echo "$SERVER_PASSWORD" | sudo -S ufw allow 9090
+                sleep 10
+                '''
+            }
+            stage('Test the Server is UP or Not'){
+                def get = new URL("http://192.168.1.7:9090/").openConnection();
+                def getRC = get.getResponseCode();
+                if(getRC.equals(200)) {
+                    //println(get.getInputStream().getText());
+                    println "SERVER IS UP AND RUNNIG"
+                }
+                else{
+                    sendmail("Server didn't cme UP")
+                    error("========Server didn't come UP========")
+                }
+            }
+            sendmail("Completed")
         }
+    }catch(err){
+        sendmail("ERROR :${err}")
+        currentBuild.result = 'FAILURE'
     }
 }
