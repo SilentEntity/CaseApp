@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=silent
 Group=www-data
-WorkingDirectory=/home/silent/Deployment/CaseApp
+WorkingDirectory=/home/silent/Deployment
 Environment="PATH=/home/silent/Deployment/cicd_env/bin"
 ExecStart=/home/silent/Deployment/cicd_env/bin/gunicorn --workers 3 --bind 0.0.0.0:9090 run:app
 
