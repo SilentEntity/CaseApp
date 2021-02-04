@@ -50,7 +50,6 @@ node('PyNode'){
                     println "SERVER IS UP AND RUNNIG"
                 }
                 else{
-                    sendmail("Server didn't cme UP")
                     error("========Server didn't come UP========")
                 }
             }
