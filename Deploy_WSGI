@@ -1,8 +1,8 @@
 node('PyNode'){
-    stage('Git Checkout'){
-        git branch: 'main', url: 'https://github.com/SilentEntity/CaseApp.git'
-    }
     dir('/home/$USER'){
+        stage('Git Checkout'){
+            git branch: 'main', url: 'https://github.com/SilentEntity/CaseApp.git'
+        }
         stage('Setting up Environment'){
             sh '''#!/bin/bash
             echo $PATH
@@ -19,8 +19,15 @@ node('PyNode'){
         }
         stage('SetUp WSGI Server'){
             sh '''#!/bin/bash
-            echo "WASGI SERVER"
-            
+            sudo << "$SERVER_PASSWORD" cp CaseApp/CaseApp.service /etc/systemd/system/
+            sudo << "$SERVER_PASSWORD" systemctl start CaseApp.service
+            sudo << "$SERVER_PASSWORD" systemctl enable CaseApp.service
+            '''
+        }
+        stage('Configure Ngnix Server'){
+            sh '''#!/bin/bash
+            sudo << "$SERVER_PASSWORD" cp CaseApp/CaseApp /etc/nginx/sites-available/
+            sudo << "$SERVER_PASSWORD" ln -s /etc/nginx/sites-available/CaseApp /etc/nginx/sites-enabled
             '''
         }
     }
