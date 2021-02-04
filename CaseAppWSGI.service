@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve CaseApp
+After=network.target
+
+[Service]
+User=$USER
+Group=www-data
+WorkingDirectory=/home/$USER/CaseApp
+Environment="PATH=/home/$USER/cicd/bin"
+ExecStart=/home/$USER/cicd/bin/gunicorn --workers 3 --bind 0.0.0.0:9090 run:app
+
+[Install]
+WantedBy=multi-user.target
