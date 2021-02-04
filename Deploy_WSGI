@@ -20,14 +20,14 @@ node('PyNode'){
         }
         stage('SetUp WSGI Server'){
             sh '''#!/bin/bash
-            sudo << "$SERVER_PASSWORD" cp CaseApp/CaseAppWSGI.service /etc/systemd/system/
-            sudo << "$SERVER_PASSWORD" systemctl start CaseAppWSGI.service
-            sudo << "$SERVER_PASSWORD" systemctl enable CaseAppWSGI.service
+            echo "$SERVER_PASSWORD" | sudo -S cp CaseApp/CaseAppWSGI.service /etc/systemd/system/
+            echo "$SERVER_PASSWORD" | sudo -S systemctl start CaseAppWSGI.service
+            echo "$SERVER_PASSWORD" | sudo -S systemctl enable CaseAppWSGI.service
             '''
         }
         stage('Disable FireWall'){
             sh '''#!/bin/bash
-            sudo << "$SERVER_PASSWORD" ufw allow 9090
+            echo "$SERVER_PASSWORD" | sudo -S ufw allow 9090
             '''
         }
     }
