@@ -1,0 +1,27 @@
+node('PyNode'){
+    stage('Git Checkout'){
+        git branch: 'main', url: 'https://github.com/SilentEntity/CaseApp.git'
+    }
+    dir('/home/$USER'){
+        stage('Setting up Environment'){
+            sh '''#!/bin/bash
+            echo $PATH
+            pip3 install virtualenv;
+            virtualenv -p python3 cicd_env;
+            source cicd_env/bin/activate;
+            pip3 install -r requirements.txt;
+            pip3 list'''
+        }
+        stage('BATS'){
+            sh '''#!/bin/bash
+            source cicd_env/bin/activate;
+            pytest -v'''
+        }
+        stage('SetUp WSGI Server'){
+            sh '''#!/bin/bash
+            echo "WASGI SERVER"
+            
+            '''
+        }
+    }
+}

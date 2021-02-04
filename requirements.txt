@@ -1,4 +1,0 @@
-twine
-flask
-gunicorn
-pytest
