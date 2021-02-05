@@ -52,7 +52,7 @@ resource "aws_instance" "backend" {
     inline = [
       "python3 --version",
       "sudo apt-get update",
-      "sudo apt-get install python3-pip -y",
+      "sudo apt-get install python3-wheel build-essential python3-dev python3-pip -y",
       "sudo ufw allow 9090",
       "export PATH=$PATH:/home/ubuntu/.local/bin",
       "git clone https://github.com/SilentEntity/CaseApp.git",
@@ -63,6 +63,7 @@ resource "aws_instance" "backend" {
       "sudo systemctl start AWS_WSGI.service",
       "sudo systemctl enable AWS_WSGI.service"
     ]
+  }
 }
 output "backend_public_ips" {
   value = aws_instance.backend.*.public_ip
