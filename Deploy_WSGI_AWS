@@ -1,0 +1,60 @@
+def sendmail(status){
+    emailext( 
+        to: "Junk@junky.com",
+        subject: "${status}: JOB '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+        body: """<p>${status}: JOB '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+           <p> Check the Console output at <a href='${env.BUILD_URL}'>${env.JOB_NAME}[${env.BUILD_NUMBER}]</a></p>""",
+    )
+}
+node('PyNode'){
+    try{
+        stage('Git Checkout'){
+            git branch: 'main', url: 'https://github.com/SilentEntity/CaseApp.git'
+        }
+        sendmail("Started")
+        stage('Setting up Environment'){
+            sh '''#!/bin/bash
+            echo $PATH
+            pip3 install virtualenv;
+            virtualenv -p python3 cicd_env;
+            source cicd_env/bin/activate;
+            pip3 install -r requirements.txt;
+            pip3 list'''
+        }
+        stage('BATS'){
+            sh '''#!/bin/bash
+            source cicd_env/bin/activate;
+            pytest -v'''
+        }
+        stage('Package the Code'){
+            println "Package the code"
+            sh '''#!/bin/bash
+            source cicd_env/bin/activate;
+            python3 setup.py sdist bdist_wheel 
+            '''
+        }
+        stage('Upload to Nexus Repo'){
+            println "==Uploading the code=="
+            sh '''#!/bin/bash
+            source cicd_env/bin/activate;
+            twine upload dist/* --repository-url $NEXUS_REPO_URL -u $NEXUS_USER -p $NEXUS_PASSWORD
+            '''
+        }
+        stage('Deploy To AWS'){
+            println "==Uploading the code=="
+            sh '''#!/bin/bash
+            cd Terraform;
+            terraform init;
+            terraform apply --auto-approve
+            '''
+        }
+        stage('Archive the artifacts'){
+            println "===Archive==="
+            archiveArtifacts artifacts: 'dist/*', followSymlinks: false
+        }
+        sendmail("Completed")
+    }catch(err){
+        sendmail("ERROR :${err}")
+        currentBuild.result = 'FAILURE'
+    }
+}
