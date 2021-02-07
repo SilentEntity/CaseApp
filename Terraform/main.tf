@@ -29,7 +29,7 @@ resource "aws_instance" "backend" {
       "git clone https://github.com/SilentEntity/CaseApp.git",
       "cd CaseApp",
       "pip3 install -r requirements.txt",
-      "sudo cp terra/AWS_WSGI.service /etc/systemd/system/",
+      "sudo cp Terraform/AWS_WSGI.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo systemctl start AWS_WSGI.service",
       "sudo systemctl enable AWS_WSGI.service"
