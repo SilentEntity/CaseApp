@@ -1,52 +1,3 @@
-provider "aws" {
-  region  = var.region
-  version = ">=3.7,<=3.11"
-}
-
-variable "region" {
-  default = "ap-south-1"
-}
-variable "key_name" {
-  default = "SonarQube"
-}
-variable "security_id" {
-  default = "CaseApp"
-}
-variable "pvt_key_name" {
-  default = "/home/silent/.ssh/SonarQube.pem"
-}
-variable "instances" {
-  default = 2
-}
-
-data "aws_availability_zones" "zone_east" {}
-
-data "aws_ami" "ubuntu_ami" {
-  most_recent = "true"
-  owners      = ["099720109477"]
-  
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04*"]
-  }
-
-}
-
-data "aws_vpc" "selected" {
-  default = true
-}
-
-data "aws_subnet_ids" "subnets" {
-  vpc_id = data.aws_vpc.selected.id
-}
-
-data "aws_security_groups" "ELB" {
-    filter {
-        name = "group-name"
-        values = ["ELB"]
-    }
-}
-
 resource "aws_instance" "backend" {
   ami               = data.aws_ami.ubuntu_ami.id
   instance_type     = "t2.micro"
@@ -123,14 +74,4 @@ resource "aws_lb_listener" "LB_listener" {
     target_group_arn = aws_lb_target_group.backbendCase-lb-tg.arn
   }
   depends_on = [aws_lb_target_group_attachment.backend_attachment]
-}
-
-output "backend_public_ips" {
-  value = aws_instance.backend.*.public_ip
-}
-output "backend_public_dns" {
-  value = aws_instance.backend.*.public_dns
-}
-output "ELB_DNS" {
-  value = aws_lb.ELB_CaseApp
 }
