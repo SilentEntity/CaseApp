@@ -18,6 +18,21 @@ resource "aws_instance" "backend" {
     host  = self.public_ip 
   }
 
+  provisioner "file" {
+    source      = "requirements.txt"
+    destination = "/home/ubuntu"
+  }
+
+  provisioner "file" {
+    source      = "dist/CaseApp-*.tar.gz"
+    destination = "/home/ubuntu"
+  }
+
+  provisioner "file" {
+    source      = "AWS_WSGI.service"
+    destination = "/home/ubuntu"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "sleep 20",
@@ -26,10 +41,9 @@ resource "aws_instance" "backend" {
       "sudo apt-get install python3-wheel build-essential python3-dev python3-pip -y",
       "sudo ufw allow 9090",
       "export PATH=$PATH:/home/ubuntu/.local/bin",
-      "git clone https://github.com/SilentEntity/CaseApp.git",
-      "cd CaseApp",
       "pip3 install -r requirements.txt",
-      "sudo cp Terraform/AWS_WSGI.service /etc/systemd/system/",
+      "tar -xzf CaseApp-*.tar.gz",      
+      "sudo cp AWS_WSGI.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo systemctl start AWS_WSGI.service",
       "sudo systemctl enable AWS_WSGI.service"
