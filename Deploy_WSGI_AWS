@@ -43,6 +43,8 @@ node('PyNode'){
         stage('Deploy To AWS'){
             println "==Uploading the code=="
             sh '''#!/bin/bash
+            cp dist/* Terraform/
+            cp requirements.txt Terraform/
             cd Terraform;
             terraform init;
             terraform apply --auto-approve
