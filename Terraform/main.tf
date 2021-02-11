@@ -19,7 +19,7 @@ resource "aws_instance" "backend" {
   }
 
   provisioner "file" {
-    source      = "requirements.txt"
+    source      = "CaseApp/requirements.txt"
     destination = "/home/ubuntu"
   }
 
