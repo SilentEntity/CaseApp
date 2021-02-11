@@ -20,17 +20,17 @@ resource "aws_instance" "backend" {
 
   provisioner "file" {
     source      = "requirements.txt"
-    destination = "/home/ubuntu"
+    destination = "/home/ubuntu/requirements.txt"
   }
 
   provisioner "file" {
-    source      = "CaseApp-*.tar.gz"
-    destination = "/home/ubuntu"
+    source      = "CaseApp-0.1.0.tar.gz"
+    destination = "/home/ubuntu/CaseApp-0.1.0.tar.gz"
   }
 
   provisioner "file" {
     source      = "AWS_WSGI.service"
-    destination = "/home/ubuntu"
+    destination = "/home/ubuntu/AWS_WSGI.service"
   }
 
   provisioner "remote-exec" {
@@ -42,8 +42,9 @@ resource "aws_instance" "backend" {
       "sudo ufw allow 9090",
       "export PATH=$PATH:/home/ubuntu/.local/bin",
       "pip3 install -r requirements.txt",
-      "tar -xzf CaseApp-*.tar.gz",      
-      "sudo cp AWS_WSGI.service /etc/systemd/system/",
+      "sudo chmod +x CaseApp-*.tar.gz",
+      "sudo tar -xzf CaseApp-*.tar.gz",
+      "sudo cp AWS_WSGI.service /etc/systemd/system/",      
       "sudo systemctl daemon-reload",
       "sudo systemctl start AWS_WSGI.service",
       "sudo systemctl enable AWS_WSGI.service"
