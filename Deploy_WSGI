@@ -43,7 +43,7 @@ node('PyNode'){
                 '''
             }
             stage('Test the Server is UP or Not'){
-                def get = new URL("http://192.168.1.7:9090/").openConnection();
+                def get = new URL("http://192.168.1.4:9090/").openConnection();
                 def getRC = get.getResponseCode();
                 if(getRC.equals(200)) {
                     //println(get.getInputStream().getText());
